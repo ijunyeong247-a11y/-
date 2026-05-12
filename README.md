@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>레이드 점수 기여도 계산기</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: #fff;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 500px;
+        background: #111827;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-size: 13px;
+        margin-top: 10px;
+        display: block;
+        color: #cbd5e1;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        background: #1f2937;
+        color: #fff;
+    }
+
+    .players {
+        margin-top: 15px;
+    }
+
+    .player {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .player input {
+        flex: 1;
+    }
+
+    .btn-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .add {
+        background: #10b981;
+        color: white;
+    }
+
+    .calc {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .result {
+        margin-top: 20px;
+        background: #1f2937;
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .highlight {
+        color: #60a5fa;
+        font-weight: bold;
+    }
+
+    .remove {
+        background: #ef4444;
+        color: white;
+        border-radius: 8px;
+        width: 40px;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>🎮 레이드 점수 기여도 계산기</h1>
+
+    <label>목표 점수</label>
+    <input type="number" id="target" value="470000">
+
+    <label>기본 점수 (고정)</label>
+    <input type="number" id="base" value="1000">
+
+    <div class="players" id="players">
+        <label>플레이어 추가 점수</label>
+
+        <div class="player">
+            <input type="number" value="56.5" step="0.1">
+            <button class="remove" onclick="removePlayer(this)">X</button>
+        </div>
+
+        <div class="player">
+            <input type="number" value="45" step="0.1">
+            <button class="remove" onclick="removePlayer(this)">X</button>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="add" onclick="addPlayer()">+ 사람 추가</button>
+        <button class="calc" onclick="calculate()">계산하기</button>
+    </div>
+
+    <div class="result" id="result">
+        결과가 여기에 표시됩니다.
+    </div>
+
+</div>
+
+<script>
+function addPlayer() {
+    const div = document.createElement("div");
+    div.className = "player";
+    div.innerHTML = `
+        <input type="number" value="30" step="0.1">
+        <button class="remove" onclick="removePlayer(this)">X</button>
+    `;
+    document.getElementById("players").appendChild(div);
+}
+
+function removePlayer(btn) {
+    btn.parentElement.remove();
+}
+
+function calculate() {
+    const target = parseFloat(document.getElementById("target").value);
+    const base = parseFloat(document.getElementById("base").value);
+
+    const inputs = document.querySelectorAll(".player input");
+
+    let perSecList = [];
+
+    inputs.forEach(input => {
+        const add = parseFloat(input.value);
+        const perSec = base + (add * 10);
+        perSecList.push(perSec);
+    });
+
+    const totalPerSec = perSecList.reduce((a,b)=>a+b,0);
+
+    let resultHTML = "";
+
+    const timeSec = target / totalPerSec;
+
+    resultHTML += `⏱ 예상 시간: <span class="highlight">${timeSec.toFixed(2)}초</span><br><br>`;
+    resultHTML += `📊 기여도 & 점수 분배<br><br>`;
+
+    perSecList.forEach((ps, i) => {
+        const con = (ps / totalPerSec) * 100;
+        const myTarget = target * (con / 100);
+
+        resultHTML += `
+            플레이어 ${i+1}<br>
+            - 기여도: <span class="highlight">${con.toFixed(2)}%</span><br>
+            - 할당 점수: <span class="highlight">${myTarget.toFixed(0)}</span><br><br>
+        `;
+    });
+
+    document.getElementById("result").innerHTML = resultHTML;
+}
+</script>
+
+</body>
+</html>
